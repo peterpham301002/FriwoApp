@@ -21,7 +21,7 @@ namespace FRIWOApp.Services
         public WorkInstructionService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri("https://fvn-s-trace03.friwo.local:4434/");
+            _httpClient.BaseAddress = new Uri("https://fvn-s-web01.friwo.local:7033/");
         }
 
         public async Task<List<string>>? GetMasterBOMPart()
@@ -126,7 +126,7 @@ namespace FRIWOApp.Services
             {
                 var client = new HttpClient();
                 var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(wi), Encoding.UTF8, "application/json");
-                var result = await client.PostAsync("https://fvn-s-trace03.friwo.local:4434/api/SapMasterBOM/AddSignedDoc", content);
+                var result = await client.PostAsync("https://fvn-s-web01.friwo.local:7033/api/SapMasterBOM/AddSignedDoc", content);
                 return "OK";
             }
             catch (Exception ex)
@@ -174,7 +174,7 @@ namespace FRIWOApp.Services
                 wi.Filename = filename; 
                 var client = new HttpClient();
                 var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(wi), Encoding.UTF8, "application/json");
-                var result = await client.PostAsync("https://fvn-s-trace03.friwo.local:4434/api/WordInstuction/AddToPDF", content);
+                var result = await client.PostAsync("https://fvn-s-web01.friwo.local:7033/api/WordInstuction/AddToPDF", content);
                 return "OK";
             }
             catch (Exception ex)
