@@ -1,0 +1,195 @@
+﻿@page "/"
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.SfPdfViewer
+@using System.Web
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.Navigations
+<h3>WorkInstruction</h3>
+
+<SfTab>
+    <TabAnimationSettings>
+        <TabAnimationPrevious Effect=AnimationEffect.None></TabAnimationPrevious>
+        <TabAnimationNext Effect=AnimationEffect.None></TabAnimationNext>
+    </TabAnimationSettings>
+    <TabItems>
+        <TabItem>
+            <ChildContent>
+                <TabHeader Text="QC"></TabHeader>
+            </ChildContent>
+            <ContentTemplate>
+                <div class="container">
+                    <div hidden class="col-lg-12 control-section sb-property-border justify-content-end">
+                        <div class="col-lg-4 col-10 end-0">
+                            <SfCheckBox @bind-Checked="@isChecked">Optional component: @isChecked</SfCheckBox>
+                        </div>
+                    </div>
+                    <div class="col-lg-12 control-section sb-property-border">
+                        @if (isChecked)
+                        {
+                            <div class="control-wrapper col-lg-4 col-10">
+                                <SfTextBox @ref=@ComponentTextBox @bind-Value="@Component" @onkeyup="@keyup" OnInput="@InputHandler" Placeholder="Component" FloatLabelType="@FloatLabelType.Auto"></SfTextBox>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="control-wrapper col-lg-4 col-10">
+                                <label class="example-label">Select part PCB</label>
+                                @* <SfTextBox @ref=@PartPCBTextBox @bind-Value="@PartPCB" @onkeyup="@keyup" OnInput="@InputHandler" Placeholder="Part PCB" FloatLabelType="@FloatLabelType.Auto"></SfTextBox> *@
+                                <SfComboBox @bind-Value="@PartPCB" TValue="string" TItem="string" PopupHeight="230px" DataSource="@PartPCBs" AllowFiltering="true">
+                                    <ComboBoxEvents TValue="string" TItem="string" ValueChange="OnPartSelected" />
+                                </SfComboBox>
+                            </div>
+                            <div class="control-wrapper col-lg-4 col-10">
+                                <label class="example-label">Select component part</label>
+                                <SfComboBox @bind-Value="@Component" TValue="string" TItem="string" PopupHeight="230px" DataSource="@Components" AllowFiltering="true">
+                                    <ComboBoxEvents TValue="string" TItem="string" ValueChange="OnComponentSelected" />
+                                </SfComboBox>
+                            </div>
+                        }
+                        <div class="control-wrapper">
+                            <label>PDF</label>
+                            <SfPdfViewer2 @ref="viewer" DocumentPath="@DocumentPath"
+                                          Width="100%"
+                                          Height="100%"
+                                          CssClass="bg-transparent">
+                            </SfPdfViewer2>
+                        </div>
+                        <div class="control-wrapper">
+                            <SfButton CssClass="mt-2" IsPrimary="true" @onclick="OnVerifyClick">Verify</SfButton>
+                        </div>
+                    </div>
+                </div>
+                <SfDialog Target="#target" Width="50%" ShowCloseIcon="true" @bind-Visible="Visibility" IsModal="true">
+                    <DialogTemplates>
+                        <Header>Verify</Header>
+                        <Content>
+                            <SfTextBox @ref=@UserIDTextBox @bind-Value="@UserID" Placeholder="User ID" FloatLabelType="@FloatLabelType.Auto"></SfTextBox>
+                            <SfTextBox @ref=@UserNameTextBox @bind-Value="@UserName" Placeholder="User Name" FloatLabelType="@FloatLabelType.Auto"></SfTextBox>
+                        </Content>
+                    </DialogTemplates>
+                    <DialogEvents OnOpen="@DialogOpen" Closed="@DialogClose"></DialogEvents>
+                    <DialogButtons>
+                        <DialogButton IsPrimary="true" OnClick="@OnBtnClick">
+                            Confirm
+                        </DialogButton>
+                    </DialogButtons>
+                </SfDialog>
+            </ContentTemplate>
+        </TabItem>
+        <TabItem>
+            <ChildContent>
+                <TabHeader Text="Operator"></TabHeader>
+            </ChildContent>
+            <ContentTemplate>
+                <div class="container row col-12 justify-content-between">
+                    <div hidden class="col-lg-12 control-section sb-property-border justify-content-end">
+                        <div class="col-lg-4 col-10 end-0">
+                            <SfCheckBox @bind-Checked="@isCheckedOp">Optional component: @isCheckedOp</SfCheckBox>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 control-section sb-property-bolder">
+                        <div class="control-wrapper col-lg-11 col-11">
+                            <SfTextBox @ref=@WarehouseCode @bind-Value="@Warehouse" @onkeyup="@keyupWarehouse" OnInput="@InputHandlerWarehouse" Placeholder="Scan warehouse code" FloatLabelType="@FloatLabelType.Auto"></SfTextBox>
+                        </div>
+                        <div class="control-wrapper justify-content-start mb-2">
+                            <SfButton hidden CssClass="mt-2 col-11 col-lg-11 bg-success" IsPrimary="false" @onclick="OnInfoClick">Info</SfButton>
+                            <SfButton CssClass="mt-2 col-5 col-lg-5" IsPrimary="true" @onclick="OnSignClick">Sign</SfButton>
+                        </div>
+                        <div class="control-wrapper justify-content-start mb-2">
+                            <p>Part no: @WHTransfer.PartNo</p>
+                            <p>Lotbatch: @WHTransfer.Lotbatch</p>
+                            <p>Order no: @WHTransfer.OrderNo</p>
+                            <p>Component: @WHTransfer.ComponentPart</p>
+                            <p>Qty: @WHTransfer.Qty</p>
+                            <p>CRD: @QPA</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-9 control-section sb-property-bolder">
+                        <div class="control-wrapper mb-2">
+                            <SfPdfViewer2 @ref="viewer" DocumentPath="@DocumentOp"
+                                          EnableTextSearch="true"
+                                          EnableFreeText="true"
+                                          EnableTextMarkupAnnotation="true"
+                                          EnableTextSelection="true"
+                                          Width="100%"
+                                          Height="100%"
+                                          CssClass="bg-transparent">
+                            </SfPdfViewer2>
+                        </div>
+                    </div>
+                    <div hidden class="col-lg-12 control-section sb-property-border">
+                        @if (isCheckedOp)
+                        {
+                            <div class="control-wrapper col-lg-4 col-10">
+                                <SfTextBox @ref=@ComponentTextBox @bind-Value="@Component" @onkeyup="@keyupOp" OnInput="@InputHandlerOp" Placeholder="Scan warehouse code" FloatLabelType="@FloatLabelType.Auto"></SfTextBox>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="control-wrapper col-lg-4 col-10">
+                                <label class="example-label">Select part PCB</label>
+                                @* <SfTextBox @ref=@PartPCBTextBox @bind-Value="@PartPCB" @onkeyup="@keyup" OnInput="@InputHandler" Placeholder="Part PCB" FloatLabelType="@FloatLabelType.Auto"></SfTextBox> *@
+                                <SfComboBox @bind-Value="@PartPCBOp" TValue="string" TItem="string" PopupHeight="230px" DataSource="@PartPCBs" AllowFiltering="true">
+                                    <ComboBoxEvents TValue="string" TItem="string" ValueChange="OnPartSelected" />
+                                </SfComboBox>
+                            </div>
+                            <div class="control-wrapper col-lg-4 col-10">
+                                <label class="example-label">Select component part</label>
+                                <SfComboBox @bind-Value="@ComponentOp" TValue="string" TItem="string" PopupHeight="230px" DataSource="@Components" AllowFiltering="true">
+                                    <ComboBoxEvents TValue="string" TItem="string" ValueChange="OnComponentSelectedOp" />
+                                </SfComboBox>
+                            </div>
+                        }
+                        <div class="control-wrapper">
+                            <SfButton CssClass="mt-2" IsPrimary="true" @onclick="OnInfoClick">Info</SfButton>
+                        </div>
+                        <div class="control-wrapper">
+                            <label>PDF</label>
+                            <SfPdfViewer2 @ref="viewer" DocumentPath="@DocumentOp"
+                                          Width="100%"
+                                          Height="100%"
+                                          CssClass="bg-transparent">
+                            </SfPdfViewer2>
+                        </div>
+
+                    </div>
+                </div>
+                <SfDialog Target="#target" Width="50%" ShowCloseIcon="true" @bind-Visible="VisibilitySign" IsModal="true">
+                    <DialogTemplates>
+                        <Header>Operator verify</Header>
+                        <Content>
+                            <SfTextBox @ref=@UserIDTextBox @bind-Value="@UserID" Placeholder="User ID" FloatLabelType="@FloatLabelType.Auto"></SfTextBox>
+                            <SfTextBox @ref=@UserNameTextBox @bind-Value="@UserName" Placeholder="User Name" FloatLabelType="@FloatLabelType.Auto"></SfTextBox>
+                        </Content>
+                    </DialogTemplates>
+                    <DialogEvents OnOpen="@DialogOpen" Closed="@DialogClose"></DialogEvents>
+                    <DialogButtons>
+                        <DialogButton IsPrimary="true" OnClick="@OnOpConfirmClick">
+                            Operator confirm
+                        </DialogButton>
+                    </DialogButtons>
+                </SfDialog>
+                <SfDialog Target="#target" Width="50%" ShowCloseIcon="true" @bind-Visible="VisibilityInfo" IsModal="true">
+                    <DialogTemplates>
+                        <Header>PDF Information</Header>
+                        <Content>
+                            <p>Part no @WHTransfer.PartNo</p>
+                            <p>Lotbatch @WHTransfer.Lotbatch</p>
+                            <p>Order no @WHTransfer.OrderNo</p>
+                            <p>Model @WHTransfer.ComponentPart</p>
+                            <p>Qty @WHTransfer.Qty</p>
+                            <p>CRD </p>
+                        </Content>
+                    </DialogTemplates>
+                </SfDialog>
+            </ContentTemplate>
+        </TabItem>
+    </TabItems>
+</SfTab>
+
+@code {
+
+}

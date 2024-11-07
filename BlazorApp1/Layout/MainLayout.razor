@@ -1,0 +1,18 @@
+﻿@inherits LayoutComponentBase
+@using Blazored.Toast
+<BlazoredToasts />
+<div class="page">
+    <div class="sidebar bg-black" >
+        <NavMenu />
+    </div>
+
+    <main>
+        <div hidden class="top-row px-4 bg-black col-lg-12 col-12">
+            <b style="color: whitesmoke">Friwo App</b>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
